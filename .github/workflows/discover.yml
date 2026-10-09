@@ -1,10 +1,7 @@
 name: Discover API
 
 on:
-  workflow_dispatch:      # manual trigger only
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 jobs:
   discover:
@@ -12,11 +9,9 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -28,14 +23,17 @@ jobs:
 
       - name: Run discovery
         run: python find_api.py
+        continue-on-error: true
 
-      - name: Upload captured data
+      - name: List output
+        if: always()
+        run: ls -la output/ || echo "NO OUTPUT"
+
+      - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: api-discovery
-          path: |
-            output/rendered.html
-            output/captured_api.json
+          path: output/
           if-no-files-found: warn
           retention-days: 7
